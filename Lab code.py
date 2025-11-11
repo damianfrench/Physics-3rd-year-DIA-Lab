@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from mpl_tooklits.mplots3d import Axes3D
 
-df = pd.read_csv('stats.csv', delimiter=' ', header=None)
 
 
 def target_images(images,reference_images,num=10):
@@ -137,55 +136,59 @@ def averages_each_run(config_dfs,stats_dfs):
         d[['average_mean','average_scatter']]=d.mean(axis='columns')
 
 
-averages_each_run(config_dfs, stats_dfs)    
 
-run1_free_variables=free_variable_num(config_dfs['run1'])
-print('free_variables:',run1_free_variables)
+def main():
 
 
-"""Filtering the images by year, seeing, airmass and background"""
-df=filtering(df)
+    df = pd.read_csv('stats.csv', delimiter=' ', header=None)
+    averages_each_run(config_dfs, stats_dfs)    
 
-"""finding the best images according to the min_max algorithm and saving to csv"""
-
-best_images_min_max = min_max(df)
-min_max_quality=best_images_min_max['quality_score']
+    run1_free_variables=free_variable_num(config_dfs['run1'])
+    print('free_variables:',run1_free_variables)
 
 
+    """Filtering the images by year, seeing, airmass and background"""
+    df=filtering(df)
 
-best_images_min_max['file_names'].to_csv('best_images_min_max.csv', index=False)
-#ThreeD_plot(best_images_min_max, t='min_max')
-#Hists(best_images_min_max, t='min_max')
+    """finding the best images according to the min_max algorithm and saving to csv"""
 
-"""finding the best images according to z_score and saving to csv"""
-
-
-best_images_z_score = z_score(df)
-z_score_quality=best_images_z_score['quality_score']
-best_images_z_score['file_names'].to_csv('best_images_z_score.csv', index=False)
-
-
-"""finding a colletion of target images that doesnt include any of the reference images"""
-targets=target_images(df['file_names'],best_images_z_score['file_names'])
-
-targets.to_csv('target_images.csv',index=False)
+    best_images_min_max = min_max(df)
+    min_max_quality=best_images_min_max['quality_score']
 
 
 
-#ThreeD_plot(best_images_z_score, t='z_score')
-#Hists(best_images_z_score, t='z_score')
-#print(best_images_min_max['quality_score'])
-#print(best_images_z_score['quality_score'])
+    best_images_min_max['file_names'].to_csv('best_images_min_max.csv', index=False)
+    #ThreeD_plot(best_images_min_max, t='min_max')
+    #Hists(best_images_min_max, t='min_max')
 
-"""creates a mask of the difference between the two methods which only includes null values - the values that are the same, and then removes them from an indicies list to find\
-    images in both lists that are different and outputs them"""
-mask=(best_images_min_max[['seeing','airmass','background']]-best_images_z_score[['seeing','airmass','background']]).isnull()
-indicies_differnces=(best_images_min_max[['seeing','airmass','background']][mask].dropna().index,best_images_z_score[['seeing','airmass','background']][mask].dropna().index)
-#print(indicies_differnces)
-print('min_max:',best_images_min_max.loc[indicies_differnces[0][0]]['file_names'])
-print('z_score:',best_images_z_score.loc[indicies_differnces[1][0]]['file_names'])
-#print(best_images_min_max.equals(best_images_z_score))
+    """finding the best images according to z_score and saving to csv"""
 
-#merged=best_images_min_max.merge(best_images_z_score,on='file_names',suffixes=('_z_score','_min_max'))
 
+    best_images_z_score = z_score(df)
+    z_score_quality=best_images_z_score['quality_score']
+    best_images_z_score['file_names'].to_csv('best_images_z_score.csv', index=False)
+
+
+    """finding a colletion of target images that doesnt include any of the reference images"""
+    targets=target_images(df['file_names'],best_images_z_score['file_names'])
+
+    targets.to_csv('target_images.csv',index=False)
+
+
+
+    #ThreeD_plot(best_images_z_score, t='z_score')
+    #Hists(best_images_z_score, t='z_score')
+    #print(best_images_min_max['quality_score'])
+    #print(best_images_z_score['quality_score'])
+
+    """creates a mask of the difference between the two methods which only includes null values - the values that are the same, and then removes them from an indicies list to find\
+        images in both lists that are different and outputs them"""
+    mask=(best_images_min_max[['seeing','airmass','background']]-best_images_z_score[['seeing','airmass','background']]).isnull()
+    indicies_differnces=(best_images_min_max[['seeing','airmass','background']][mask].dropna().index,best_images_z_score[['seeing','airmass','background']][mask].dropna().index)
+    #print(indicies_differnces)
+    print('min_max:',best_images_min_max.loc[indicies_differnces[0][0]]['file_names'])
+    print('z_score:',best_images_z_score.loc[indicies_differnces[1][0]]['file_names'])
+    #print(best_images_min_max.equals(best_images_z_score))
+
+    #merged=best_images_min_max.merge(best_images_z_score,on='file_names',suffixes=('_z_score','_min_max'))
 
