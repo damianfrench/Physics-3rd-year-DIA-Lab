@@ -61,27 +61,20 @@ class Pipeline:
     
         score = (1 / norm_mean) + (1 / norm_scatter) - n_free_parameters / (100 - n_free_parameters)
         return score
-    
-    
-        
-        """Run your DIA Pipeline CSH script and wait for it to finish."""
-        try:
-            subprocess.run(['csh', '/home/diastudent1/Workspace/isis/register'], check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Error running the script: {e}")
-            raise
+
+
     @staticmethod
-    def full_pipeline(script_path='/home/diastudent1/Workspace/isis/register/pipeline.csh', run_no=None, deg_bg=None, deg_g1=None, deg_g2=None, deg_g3=None, sigma1=None, sigma2=None, sigma3=None):
+    def full_pipeline(run_no=None, deg_bg=None, deg_g1=None, deg_g2=None, deg_g3=None, sigma1=None, sigma2=None, sigma3=None):
         """Run the Pipeline C-shell script with the provided parameters."""
-    
-        
+
+        script_path='/home/diastudent1/Workspace/isis/register/pipeline.csh'
         # Check if all required parameters are provided
         if None in [run_no, deg_bg, deg_g1, deg_g2, deg_g3, sigma1, sigma2, sigma3]:
             raise ValueError("All parameters (run_no, deg_bg, deg_g1, deg_g2, deg_g3, sigma1, sigma2, sigma3) must be provided.")
         if sigma1 == sigma2 or sigma1 == sigma3 or sigma2 == sigma3:
             return np.inf  # Return a very high value if sigmas are equal (invalid)
         # Run the Pipeline C-shell script with the provided arguments
-        subprocess.run(['csh', script_path, str(run_no), str(deg_bg), str(deg_g1), str(deg_g2), str(deg_g3), str(sigma1), str(sigma2), str(sigma3)], check=True)
+        subprocess.run(['csh', script_path, str(run_no), str(deg_bg), str(deg_g1), str(deg_g2), str(deg_g3), str(sigma1), str(sigma2), str(sigma3)], check=True,  cwd=script_path)
     
         # Parse the results
         mean, scatter = Pipeline.parse_stats(run_no)
